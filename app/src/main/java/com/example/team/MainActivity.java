@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         info = findViewById(R.id.info_list);
         // info_list 버튼 리스너
-        info.setOnClickListener(new View.OnClickListener() {
+        /** info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showSettingsFragment();
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //SettingsFragment 리스너 생성
-        private void showSettingsFragment() {
+         private void showSettingsFragment () {
             // SettingsFragment 생성
             SettingsFragment settingsFragment = new SettingsFragment();
 
@@ -44,8 +44,7 @@ public class MainActivity extends AppCompatActivity {
                     .beginTransaction()
                     .add(R.id.main_layout, settingsFragment)
                     .commit();
-        }
-
+        } **/
         TabLayout tabLayout = findViewById(R.id.tab_layout);
         TabLayout.Tab tab1 = tabLayout.newTab();
         tab1.setText("홈");
