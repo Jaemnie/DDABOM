@@ -1,13 +1,19 @@
 package com.example.team;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.team.perser.DataCallback;
+import com.example.team.perser.JanetParser;
 import com.google.android.material.tabs.TabLayout;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,6 +55,30 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
+        });
+        JanetParser s = new JanetParser();
+        List<Object[]> list = new ArrayList<>();
+        s.Janet_list(new DataCallback() {
+            @Override
+            public void onDataReceived(List<Object[]> data) {
+                list.clear();
+                list.addAll(data);
+                for (Object[] items:list) {
+                    int tem1 = (int) items[0];
+                    String tem2 = (String) items[1];
+                    String tem3 = (String) items[2];
+                    String tem4 = (String) items[3];
+                    Log.v("결과"," "+tem1+","+tem2+","+tem3+","+tem4);
+                }
+                String url = "https://janet.co.kr/jnLics/licenseInfo?ld_id="+list.get(0)[0];
+                Log.v("자격증",""+list.get(0)[1]);
+                s.Janet_page(url);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
         });
     }
 
