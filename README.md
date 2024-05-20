@@ -58,7 +58,9 @@
 
 ## 작성자
 - [JAEMNI] (https://github.com/Jaemnie)
-- [
+- [LEESBEOM] (https://github.com/LEESBEOM)
+- [JSH9298] (https://github.com/jsh9298)
+- [yoonsangha] (https://github.com/yoonsangha)
 
 ## 문의
 질문이나 문의 사항이 있으면, [issues](https://github.com/Jaemnie/CertificationApp/issues) 섹션에 남겨주세요.
