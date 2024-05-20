@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
         });
-        JanetParser s = new JanetParser();
+        JanetParser s = new JanetParser(this);
         List<Object[]> list = new ArrayList<>();
         s.Janet_list(new DataCallback() {
             @Override

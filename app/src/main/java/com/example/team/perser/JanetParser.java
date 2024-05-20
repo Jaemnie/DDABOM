@@ -1,6 +1,11 @@
 package com.example.team.perser;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+
+import com.example.team.database.DatabaseHelper;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,16 +25,23 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class JanetParser {
-    LicenseSearchResponse searchResponse;
-    List<Object[]> L_Data;
-    public void Janet_list(DataCallback callback){
-// Retrofit 인스턴스 생성
+    private LicenseSearchResponse searchResponse;
+    private List<Object[]> L_Data;
+    private DatabaseHelper dbHelper;
+
+    public JanetParser(Context context) {
+        dbHelper = new DatabaseHelper(context);
+    }
+
+    public void Janet_list(DataCallback callback) {
+        // Retrofit instance creation
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         Log.d("호출", "Janet_list: ");
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.janet.co.kr/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+
         String query = "query JN_LICENSE_SEARCH_LIST($request: LicenseSearchInput, $page: Int, $itemsPerPage: Int) {\n" +
                 "  jnLicenseSearchList(request: $request, page: $page, itemsPerPage: $itemsPerPage) {\n" +
                 "    page {\n" +
@@ -68,9 +80,9 @@ public class JanetParser {
                 "  }\n" +
                 "}\n";
 
-// 서비스 인터페이스 생성
+        // Service interface creation
         useAPI service = retrofit.create(useAPI.class);
-// 요청 객체 생성
+        // Request object creation
         Request requestSet = new Request();
         requestSet.setField("main");
         requestSet.setKeyword("");
@@ -82,28 +94,31 @@ public class JanetParser {
         variables.setItemsPerPage(256);
         variables.setRequest(requestSet);
         LicenseSearchRequest request = new LicenseSearchRequest();
-// request 객체 설정...
+        // Set request object...
         request.setQuery(query);
         request.setVariables(variables);
         request.setOperationName("JN_LICENSE_SEARCH_LIST");
-// API 요청
+
+        // API request
         Call<LicenseSearchResponse> call = service.getLicenseSearchList(request);
         call.enqueue(new Callback<LicenseSearchResponse>() {
             @Override
             public void onResponse(Call<LicenseSearchResponse> call, Response<LicenseSearchResponse> response) {
                 if (response.isSuccessful()) {
-// 응답 성공 시 처리...
+                    // On successful response...
                     searchResponse = response.body();
                     L_Data = new ArrayList<>();
                     for (License license : searchResponse.getData().getJnLicenseSearchList().getData()) {
                         L_Data.add(new Object[]{license.getLdId(), license.getJmfldnm(), license.getRgName(), license.getLicenseType()});
+                        insertLicenseData(license);
                     }
                     callback.onDataReceived(L_Data);
                 } else {
                     callback.onFailure(new Exception("Response is not successful"));
-// 응답 실패 시 처리...
+                    // On failed response...
                 }
             }
+
             @Override
             public void onFailure(Call<LicenseSearchResponse> call, Throwable throwable) {
                 callback.onFailure(throwable);
@@ -111,37 +126,47 @@ public class JanetParser {
         });
     }
 
-    public void Janet_page(String url){
+    private void insertLicenseData(License license) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COLUMN_LDID, license.getLdId());
+        values.put(DatabaseHelper.COLUMN_JMFLDNM, license.getJmfldnm());
+        values.put(DatabaseHelper.COLUMN_RGNAME, license.getRgName());
+        values.put(DatabaseHelper.COLUMN_LICENSETYPE, license.getLicenseType());
+        db.insert(DatabaseHelper.TABLE_LICENSES, null, values);
+    }
+
+    public void Janet_page(String url) {
         new Thread(() -> {
             try {
                 Document doc = Jsoup.connect(url).get();
-                // 두 번째 'li' 태그 선택
+                // Select the second 'li' tag
                 Element secondLi = doc.select("ul.ul_list > li:eq(1)").first();
 
                 if (secondLi != null) {
-                    // h3 태그 선택 및 출력
+                    // Select and print the h3 tag
                     Element h3Tag = secondLi.selectFirst("div.q>div.q_base>h3");
                     if (h3Tag != null) {
                         Log.v("H3 text: ", h3Tag.text());
                     }
                     String tb = "";
-                    // table 태그 선택 및 처리
+                    // Select and process the table tag
                     Element table = secondLi.selectFirst("div.a>article.conts>table");
                     if (table != null) {
                         Elements rows = table.select("tr");
                         for (Element row : rows) {
-                            // 해당 행의 모든 셀(<td>)을 반복
+                            // Loop through all cells (<td>) in the row
                             Elements cells = row.select("td");
                             for (Element cell : cells) {
-                                // 셀 데이터 출력
+                                // Print cell data
                                 tb += (cell.text() + "\t");
                             }
                             tb += "\n";
                         }
                     }
                     Log.v("table : ", tb);
-                }else{
-                    Log.v("오류","데이터없음");
+                } else {
+                    Log.v("오류", "데이터없음");
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
