@@ -107,7 +107,7 @@ public class ScheduleFragment extends Fragment {
             for (String event : events) {
                 eventsDisplay.append(event).append("\n");
             }
-            Toast.makeText(getContext(), "일정 (" + date + "):\n" + eventsDisplay.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "일정 테스트(" + date + "):\n" + eventsDisplay.toString(), Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(getContext(), "일정 없음 (" + date + ")", Toast.LENGTH_SHORT).show();
         }
