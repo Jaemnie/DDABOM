@@ -18,6 +18,12 @@
         android:id="@+id/certification_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="자격증 설명"
+        android:text="주최기관"
+        android:textSize="16sp" />
+    <TextView
+        android:id="@+id/certification_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="자격증 종류"
         android:textSize="16sp" />
 </LinearLayout>
