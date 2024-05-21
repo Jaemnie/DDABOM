@@ -25,16 +25,21 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class JanetParser {
+    // API 응답을 저장할 객체
     private LicenseSearchResponse searchResponse;
+    // 자격증 데이터를 저장할 리스트
     private List<Object[]> L_Data;
+    // 데이터베이스 헬퍼 객체
     private DatabaseHelper dbHelper;
 
+    // 생성자: DatabaseHelper 초기화
     public JanetParser(Context context) {
         dbHelper = new DatabaseHelper(context);
     }
 
+    // 자넷 API를 통해 자격증 목록을 가져오는 메서드
     public void Janet_list(DataCallback callback) {
-        // Retrofit instance creation
+        // Retrofit 인스턴스 생성
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         Log.d("호출", "Janet_list: ");
         Retrofit retrofit = new Retrofit.Builder()
@@ -42,6 +47,7 @@ public class JanetParser {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
+        // GraphQL 쿼리 정의
         String query = "query JN_LICENSE_SEARCH_LIST($request: LicenseSearchInput, $page: Int, $itemsPerPage: Int) {\n" +
                 "  jnLicenseSearchList(request: $request, page: $page, itemsPerPage: $itemsPerPage) {\n" +
                 "    page {\n" +
@@ -80,9 +86,9 @@ public class JanetParser {
                 "  }\n" +
                 "}\n";
 
-        // Service interface creation
+        // 서비스 인터페이스 생성
         useAPI service = retrofit.create(useAPI.class);
-        // Request object creation
+        // 요청 객체 생성
         Request requestSet = new Request();
         requestSet.setField("main");
         requestSet.setKeyword("");
@@ -94,18 +100,18 @@ public class JanetParser {
         variables.setItemsPerPage(256);
         variables.setRequest(requestSet);
         LicenseSearchRequest request = new LicenseSearchRequest();
-        // Set request object...
+        // 요청 객체 설정
         request.setQuery(query);
         request.setVariables(variables);
         request.setOperationName("JN_LICENSE_SEARCH_LIST");
 
-        // API request
+        // API 요청
         Call<LicenseSearchResponse> call = service.getLicenseSearchList(request);
         call.enqueue(new Callback<LicenseSearchResponse>() {
             @Override
             public void onResponse(Call<LicenseSearchResponse> call, Response<LicenseSearchResponse> response) {
                 if (response.isSuccessful()) {
-                    // On successful response...
+                    // 응답 성공 시 처리
                     searchResponse = response.body();
                     L_Data = new ArrayList<>();
                     for (License license : searchResponse.getData().getJnLicenseSearchList().getData()) {
@@ -114,18 +120,20 @@ public class JanetParser {
                     }
                     callback.onDataReceived(L_Data);
                 } else {
+                    // 응답 실패 시 처리
                     callback.onFailure(new Exception("Response is not successful"));
-                    // On failed response...
                 }
             }
 
             @Override
             public void onFailure(Call<LicenseSearchResponse> call, Throwable throwable) {
+                // 요청 실패 시 처리
                 callback.onFailure(throwable);
             }
         });
     }
 
+    // 자격증 데이터를 데이터베이스에 삽입하는 메서드
     private void insertLicenseData(License license) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -136,29 +144,30 @@ public class JanetParser {
         db.insert(DatabaseHelper.TABLE_LICENSES, null, values);
     }
 
+    // 자넷 페이지에서 HTML 데이터를 파싱하는 메서드
     public void Janet_page(String url) {
         new Thread(() -> {
             try {
                 Document doc = Jsoup.connect(url).get();
-                // Select the second 'li' tag
+                // 두 번째 'li' 태그 선택
                 Element secondLi = doc.select("ul.ul_list > li:eq(1)").first();
 
                 if (secondLi != null) {
-                    // Select and print the h3 tag
+                    // h3 태그 선택 및 출력
                     Element h3Tag = secondLi.selectFirst("div.q>div.q_base>h3");
                     if (h3Tag != null) {
                         Log.v("H3 text: ", h3Tag.text());
                     }
                     String tb = "";
-                    // Select and process the table tag
+                    // table 태그 선택 및 처리
                     Element table = secondLi.selectFirst("div.a>article.conts>table");
                     if (table != null) {
                         Elements rows = table.select("tr");
                         for (Element row : rows) {
-                            // Loop through all cells (<td>) in the row
+                            // 해당 행의 모든 셀(<td>)을 반복
                             Elements cells = row.select("td");
                             for (Element cell : cells) {
-                                // Print cell data
+                                // 셀 데이터 출력
                                 tb += (cell.text() + "\t");
                             }
                             tb += "\n";
