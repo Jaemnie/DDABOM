@@ -4,12 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.team.database.DatabaseHelper;
 import com.example.team.perser.JanetParser;
@@ -19,8 +18,8 @@ import java.util.List;
 
 public class CertificationFragment extends Fragment {
 
-    // RecyclerView와 어댑터 선언
-    private RecyclerView recyclerView;
+    // ListView와 어댑터 선언
+    private ListView listView;
     private CertificationAdapter adapter;
     // 자격증 목록을 저장할 리스트
     private List<CertificationItem> certificationList;
@@ -37,8 +36,7 @@ public class CertificationFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // 프래그먼트 레이아웃을 인플레이트
         View view = inflater.inflate(R.layout.fragment_certification, container, false);
-        recyclerView = view.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        listView = view.findViewById(R.id.list_view);
 
         // DatabaseHelper 초기화
         dbHelper = new DatabaseHelper(getContext());
@@ -55,8 +53,8 @@ public class CertificationFragment extends Fragment {
     // 데이터베이스에서 데이터를 불러오는 메서드
     private void loadDataFromDatabase() {
         certificationList = dbHelper.getAllLicenses();
-        adapter = new CertificationAdapter(certificationList);
-        recyclerView.setAdapter(adapter);
+        adapter = new CertificationAdapter(getContext(), certificationList);
+        listView.setAdapter(adapter);
     }
 
     // API에서 데이터를 가져와서 데이터베이스에 저장하고 UI를 업데이트하는 메서드

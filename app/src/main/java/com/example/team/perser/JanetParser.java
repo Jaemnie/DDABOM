@@ -1,6 +1,11 @@
 package com.example.team.perser;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+
+import com.example.team.database.DatabaseHelper;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,17 +25,30 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class JanetParser {
-    LicenseSearchResponse searchResponse;
-    List<Object[]> L_Data;
-    List<Object[]> M_Data;
-    public void Janet_list(DataCallback callback){
-// Retrofit 인스턴스 생성
+    // API 응답을 저장할 객체
+    private LicenseSearchResponse searchResponse;
+    // 자격증 데이터를 저장할 리스트
+    private List<Object[]> L_Data;
+    private List<Object[]> M_Data;
+    // 데이터베이스 헬퍼 객체
+    private DatabaseHelper dbHelper;
+
+    // 생성자: DatabaseHelper 초기화
+    public JanetParser(Context context) {
+        dbHelper = new DatabaseHelper(context);
+    }
+
+    // 자넷 API를 통해 자격증 목록을 가져오는 메서드
+    public void Janet_list(DataCallback callback) {
+        // Retrofit 인스턴스 생성
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         Log.d("호출", "Janet_list: ");
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.janet.co.kr/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+
+        // GraphQL 쿼리 정의
         String query = "query JN_LICENSE_SEARCH_LIST($request: LicenseSearchInput, $page: Int, $itemsPerPage: Int) {\n" +
                 "  jnLicenseSearchList(request: $request, page: $page, itemsPerPage: $itemsPerPage) {\n" +
                 "    page {\n" +
@@ -69,9 +87,9 @@ public class JanetParser {
                 "  }\n" +
                 "}\n";
 
-// 서비스 인터페이스 생성
+        // 서비스 인터페이스 생성
         useAPI service = retrofit.create(useAPI.class);
-// 요청 객체 생성
+        // 요청 객체 생성
         Request requestSet = new Request();
         requestSet.setField("main");
         requestSet.setKeyword("");
@@ -83,33 +101,47 @@ public class JanetParser {
         variables.setItemsPerPage(256);
         variables.setRequest(requestSet);
         LicenseSearchRequest request = new LicenseSearchRequest();
-// request 객체 설정...
+        // 요청 객체 설정
         request.setQuery(query);
         request.setVariables(variables);
         request.setOperationName("JN_LICENSE_SEARCH_LIST");
-// API 요청
+
+        // API 요청
         Call<LicenseSearchResponse> call = service.getLicenseSearchList(request);
         call.enqueue(new Callback<LicenseSearchResponse>() {
             @Override
             public void onResponse(Call<LicenseSearchResponse> call, Response<LicenseSearchResponse> response) {
                 if (response.isSuccessful()) {
-// 응답 성공 시 처리...
+                    // 응답 성공 시 처리
                     searchResponse = response.body();
                     L_Data = new ArrayList<>();
                     for (License license : searchResponse.getData().getJnLicenseSearchList().getData()) {
                         L_Data.add(new Object[]{license.getLdId(), license.getJmfldnm(), license.getRgName(), license.getLicenseType()});
+                        insertLicenseData(license);
                     }
                     callback.onDataReceived(L_Data);
                 } else {
+                    // 응답 실패 시 처리
                     callback.onFailure(new Exception("Response is not successful"));
-// 응답 실패 시 처리...
                 }
             }
+
             @Override
             public void onFailure(Call<LicenseSearchResponse> call, Throwable throwable) {
+                // 요청 실패 시 처리
                 callback.onFailure(throwable);
             }
         });
+    }
+    // 자격증 데이터를 데이터베이스에 삽입하는 메서드
+    private void insertLicenseData(License license) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COLUMN_LDID, license.getLdId());
+        values.put(DatabaseHelper.COLUMN_JMFLDNM, license.getJmfldnm());
+        values.put(DatabaseHelper.COLUMN_RGNAME, license.getRgName());
+        values.put(DatabaseHelper.COLUMN_LICENSETYPE, license.getLicenseType());
+        db.insert(DatabaseHelper.TABLE_LICENSES, null, values);
     }
     public void Janet_Magazine(String url,DataCallback callback){
         new Thread(new Runnable() {

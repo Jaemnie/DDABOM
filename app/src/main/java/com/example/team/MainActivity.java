@@ -79,6 +79,19 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        s.Janet_Magazine("https://janet.co.kr/bbs/board.php?bo_table=bMagazine&page=1", new DataCallback() {
+            @Override
+            public void onDataReceived(List<Object[]> data) {
+                for(Object[] item : data){
+                    Log.v("메거진",(String) item[0]+"\n"+(String) item[1]+"\n"+(String) item[2]+"\n"+(String) item[3]);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+        });
     }
 
     private void setupTabs(TabLayout tabLayout) {
