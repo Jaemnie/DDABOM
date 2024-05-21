@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
         });
-        JanetParser s = new JanetParser();
+        JanetParser s = new JanetParser(this);
         List<Object[]> list = new ArrayList<>();
         s.Janet_list(new DataCallback() {
             @Override
@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 String url = "https://janet.co.kr/jnLics/licenseInfo?ld_id="+list.get(0)[0];
                 Log.v("자격증",""+list.get(0)[1]);
-                s.Janet_page(url);
             }
 
             @Override

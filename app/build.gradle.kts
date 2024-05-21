@@ -53,4 +53,6 @@ dependencies {
     // Jsoup
     implementation ("org.jsoup:jsoup:1.17.2")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+    // SQLite
+    implementation ("androidx.sqlite:sqlite:2.1.0")
 }
