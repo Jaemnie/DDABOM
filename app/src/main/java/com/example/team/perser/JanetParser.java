@@ -22,6 +22,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class JanetParser {
     LicenseSearchResponse searchResponse;
     List<Object[]> L_Data;
+    List<Object[]> M_Data;
     public void Janet_list(DataCallback callback){
 // Retrofit 인스턴스 생성
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
@@ -110,41 +111,30 @@ public class JanetParser {
             }
         });
     }
+    public void Janet_Magazine(String url,DataCallback callback){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Document doc = Jsoup.connect(url).get();
+                    // li 요소를 선택
+                    Elements listItems = doc.select("ul.flleft>li");
+                    M_Data = new ArrayList<>();
+                    // 각 li 요소를 순회하며 정보 추출
+                    for (Element listItem : listItems) {
+                        String link = listItem.select("a").attr("href");
+                        String imgSrc = listItem.select(".imgWrap img").attr("src");
+                        String title = listItem.select("strong").text();
+                        String description = listItem.select("p").text();
 
-    public void Janet_page(String url){
-        new Thread(() -> {
-            try {
-                Document doc = Jsoup.connect(url).get();
-                // 두 번째 'li' 태그 선택
-                Element secondLi = doc.select("ul.ul_list > li:eq(1)").first();
-
-                if (secondLi != null) {
-                    // h3 태그 선택 및 출력
-                    Element h3Tag = secondLi.selectFirst("div.q>div.q_base>h3");
-                    if (h3Tag != null) {
-                        Log.v("H3 text: ", h3Tag.text());
+                        // 추출한 정보 출력
+                        M_Data.add(new Object[]{link,imgSrc,title,description});
                     }
-                    String tb = "";
-                    // table 태그 선택 및 처리
-                    Element table = secondLi.selectFirst("div.a>article.conts>table");
-                    if (table != null) {
-                        Elements rows = table.select("tr");
-                        for (Element row : rows) {
-                            // 해당 행의 모든 셀(<td>)을 반복
-                            Elements cells = row.select("td");
-                            for (Element cell : cells) {
-                                // 셀 데이터 출력
-                                tb += (cell.text() + "\t");
-                            }
-                            tb += "\n";
-                        }
-                    }
-                    Log.v("table : ", tb);
-                }else{
-                    Log.v("오류","데이터없음");
+                    callback.onDataReceived(M_Data);
+                }catch (IOException e){
+                    e.printStackTrace();
+                    callback.onFailure(e);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }).start();
     }
