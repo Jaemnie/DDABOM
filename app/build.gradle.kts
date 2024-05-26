@@ -29,6 +29,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    buildToolsVersion = "34.0.0"
 }
 
 dependencies {
@@ -55,4 +56,7 @@ dependencies {
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     // SQLite
     implementation ("androidx.sqlite:sqlite:2.1.0")
+    // Custom CalendarView
+    implementation("com.prolificinteractive:material-calendarview:1.4.3")
 }
+

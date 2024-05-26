@@ -102,12 +102,12 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout.Tab tab2 = tabLayout.newTab();
         tab2.setText("자격증");
-        tab2.setIcon(R.drawable.ic_launcher_foreground);
+        tab2.setIcon(R.drawable.ic_cert);
         tabLayout.addTab(tab2);
 
         TabLayout.Tab tab3 = tabLayout.newTab();
         tab3.setText("일정");
-        tab3.setIcon(R.drawable.ic_launcher_background);
+        tab3.setIcon(R.drawable.ic_sche);
         tabLayout.addTab(tab3);
     }
 
