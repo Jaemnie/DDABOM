@@ -135,7 +135,10 @@ public class ScheduleFragment extends Fragment {
             }
             Toast.makeText(getContext(), "일정 (" + date + "):\n" + eventsDisplay.toString(), Toast.LENGTH_LONG).show();
             showScheduler.setText(eventsDisplay.toString());
-            // 해당날짜 표시
+            // 해당날짜  표시
+            showScheduler.setText(getEventDate(selectedDate).toString());
+            Toast.makeText(getContext(), "현재시간 (" + CalendarDay.today() + "):\n" , Toast.LENGTH_LONG).show();
+
             calendarView.addDecorator(new ScheduleEventDecorator(Color.RED, Collections.singleton(getEventDate(selectedDate))));
         } else {
             Toast.makeText(getContext(), "일정 없음 (" + date + ")", Toast.LENGTH_SHORT).show();
@@ -146,7 +149,7 @@ public class ScheduleFragment extends Fragment {
     public CalendarDay getEventDate (String selectedDate) {
         String[] dateParts = selectedDate.split("-");
         int year = Integer.parseInt(dateParts[0]);
-        int month = Integer.parseInt(dateParts[1]);
+        int month = Integer.parseInt(dateParts[1])-1; // Custom Calendar는 자체적으로 월을 +1 안해도 자동적으로 올려주기 때문에 여기선 -1을 해준다
         int day = Integer.parseInt(dateParts[2]);
         CalendarDay selectedDay = CalendarDay.from(year, month, day);
         return selectedDay;
