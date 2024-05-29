@@ -25,41 +25,37 @@ import java.util.HashMap;
 
 public class ScheduleFragment extends Fragment {
 
-    private MaterialCalendarView calendarView;
-    private FloatingActionButton addButton;
-    private HashMap<String, ArrayList<String>> scheduleMap;
-    private String selectedDate;
-    private TextView showScheduleDate;
-    private TextView showScheduler;
+    private MaterialCalendarView calendarView;  // 달력 뷰
+    private FloatingActionButton addButton;  // 일정 추가 버튼
+    private HashMap<String, ArrayList<String>> scheduleMap;  // 일정 데이터를 저장할 맵
+    private String selectedDate;  // 선택된 날짜
+    private TextView showScheduleDate;  // 선택된 날짜를 보여주는 텍스트뷰
+    private TextView showScheduler;  // 일정을 보여주는 텍스트뷰
 
-    private ScheduleToday scheduleToday = new ScheduleToday();
+    private ScheduleToday scheduleToday = new ScheduleToday();  // 오늘 날짜를 표시하는 데코레이터
 
     public ScheduleFragment() {
-        // Required empty public constructor
+        // 기본 생성자
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
-        calendarView = view.findViewById(R.id.calendar_view);
-        addButton = view.findViewById(R.id.fab_add);
-        showScheduleDate = (TextView) view.findViewById(R.id.showScheduleDay);
-        showScheduler = (TextView) view.findViewById(R.id.showSchedule);
-        scheduleMap = new HashMap<>();
-        // 초기 선택 날짜 설정
-        /*selectedDate = getCurrentDate();*/
+        calendarView = view.findViewById(R.id.calendar_view);  // 달력 뷰 초기화
+        addButton = view.findViewById(R.id.fab_add);  // 추가 버튼 초기화
+        showScheduleDate = (TextView) view.findViewById(R.id.showScheduleDay);  // 날짜 텍스트뷰 초기화
+        showScheduler = (TextView) view.findViewById(R.id.showSchedule);  // 일정 텍스트뷰 초기화
+        scheduleMap = new HashMap<>();  // 일정 맵 초기화
 
-        // 달력꾸미기
-        calendarView.addDecorators( 
-
-                // 토, 일요일 색깔
-                new ScheduleSundayDecorator()
-                ,new ScheduleSaturdayDecorator()
-                // 오늘 날짜
-                ,scheduleToday
+        // 달력 꾸미기
+        calendarView.addDecorators(
+                new ScheduleSundayDecorator(),  // 일요일 색상 설정
+                new ScheduleSaturdayDecorator(),  // 토요일 색상 설정
+                scheduleToday  // 오늘 날짜 설정
         );
 
+        // 날짜 선택 리스너 설정
         calendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
@@ -67,28 +63,26 @@ public class ScheduleFragment extends Fragment {
                 int month = date.getMonth();
                 int day = date.getDay();
 
-                selectedDate = String.format("%04d-%02d-%02d", year, month+1, day);
-                displayScheduleForDate(selectedDate);
+                // 선택된 날짜 포맷 설정
+                selectedDate = String.format("%04d-%02d-%02d", year, month + 1, day);
+                displayScheduleForDate(selectedDate);  // 선택된 날짜의 일정 표시
             }
         });
 
-        calendarView.setSelectedDate(CalendarDay.today());
+        calendarView.setSelectedDate(CalendarDay.today());  // 오늘 날짜를 기본 선택으로 설정
 
+        // 추가 버튼 클릭 리스너 설정
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAddEventDialog();
+                showAddEventDialog();  // 일정 추가 다이얼로그 표시
             }
         });
 
         return view;
     }
 
-    /*private String getCurrentDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return sdf.format(new Date(calendarView.getDate()));
-    }*/
-
+    // 일정 추가 다이얼로그 표시
     private void showAddEventDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("일정 추가");
@@ -100,7 +94,7 @@ public class ScheduleFragment extends Fragment {
             EditText eventInput = customLayout.findViewById(R.id.edit_text_event);
             String event = eventInput.getText().toString();
             if (!event.isEmpty()) {
-                addEventToSchedule(selectedDate, event);
+                addEventToSchedule(selectedDate, event);  // 일정 추가
                 Toast.makeText(getContext(), "일정 추가: " + event, Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getContext(), "일정을 입력하세요.", Toast.LENGTH_SHORT).show();
@@ -113,6 +107,7 @@ public class ScheduleFragment extends Fragment {
         dialog.show();
     }
 
+    // 일정 추가
     private void addEventToSchedule(String date, String event) {
         ArrayList<String> events = scheduleMap.get(date);
         if (events == null) {
@@ -120,13 +115,12 @@ public class ScheduleFragment extends Fragment {
             scheduleMap.put(date, events);
         }
         events.add(event);
-        displayScheduleForDate(date);
-
-
+        displayScheduleForDate(date);  // 일정 추가 후 일정 표시
     }
 
+    // 날짜에 해당하는 일정 표시
     private void displayScheduleForDate(String date) {
-        showScheduleDate.setText(date+"\n시험일정");
+        showScheduleDate.setText(date + "\n시험일정");
         ArrayList<String> events = scheduleMap.get(date);
         if (events != null) {
             StringBuilder eventsDisplay = new StringBuilder();
@@ -135,26 +129,24 @@ public class ScheduleFragment extends Fragment {
             }
             Toast.makeText(getContext(), "일정 (" + date + "):\n" + eventsDisplay.toString(), Toast.LENGTH_LONG).show();
             showScheduler.setText(eventsDisplay.toString());
-            // 해당날짜  표시
+            // 해당 날짜 표시
             showScheduler.setText(getEventDate(selectedDate).toString());
-            Toast.makeText(getContext(), "현재시간 (" + CalendarDay.today() + "):\n" , Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "현재시간 (" + CalendarDay.today() + "):\n", Toast.LENGTH_LONG).show();
 
+            // 이벤트가 있는 날짜를 달력에 표시
             calendarView.addDecorator(new ScheduleEventDecorator(Color.RED, Collections.singleton(getEventDate(selectedDate))));
         } else {
             Toast.makeText(getContext(), "일정 없음 (" + date + ")", Toast.LENGTH_SHORT).show();
             showScheduler.setText("예정된 일정이 없습니다!");
         }
     }
-    // 이벤트 날짜를 CalendarDay로 바꾸기
-    public CalendarDay getEventDate (String selectedDate) {
+
+    // 선택된 날짜를 CalendarDay 객체로 변환
+    public CalendarDay getEventDate(String selectedDate) {
         String[] dateParts = selectedDate.split("-");
         int year = Integer.parseInt(dateParts[0]);
-        int month = Integer.parseInt(dateParts[1])-1; // Custom Calendar는 자체적으로 월을 +1 안해도 자동적으로 올려주기 때문에 여기선 -1을 해준다
+        int month = Integer.parseInt(dateParts[1]) - 1;  // CalendarView에서 월은 0부터 시작
         int day = Integer.parseInt(dateParts[2]);
-        CalendarDay selectedDay = CalendarDay.from(year, month, day);
-        return selectedDay;
+        return CalendarDay.from(year, month, day);
     }
-
 }
-
-
