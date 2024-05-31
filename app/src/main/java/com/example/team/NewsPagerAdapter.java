@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 public class NewsPagerAdapter extends RecyclerView.Adapter<NewsPagerAdapter.NewsViewHolder> {
@@ -28,7 +30,9 @@ public class NewsPagerAdapter extends RecyclerView.Adapter<NewsPagerAdapter.News
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
         NewsItem newsItem = newsList.get(position);
-        holder.imageView.setImageResource(newsItem.getImageResId());
+        Glide.with(holder.imageView.getContext())
+                .load(newsItem.getImageUrl())
+                .into(holder.imageView);
     }
 
     @Override

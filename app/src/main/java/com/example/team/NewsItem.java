@@ -1,13 +1,13 @@
 package com.example.team;
 
 public class NewsItem {
-    private int imageResId;
+    private String imageUrl;
 
-    public NewsItem(int imageResId) {
-        this.imageResId = imageResId;
+    public NewsItem(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
-    public int getImageResId() {
-        return imageResId;
+    public String getImageUrl() {
+        return imageUrl;
     }
 }

@@ -10,7 +10,6 @@ import com.example.team.CertificationItem;
 import java.util.ArrayList;
 import java.util.List;
 
-// SQLiteOpenHelper를 상속하여 데이터베이스를 관리하는 클래스
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     // 데이터베이스 이름과 버전 정의
@@ -25,14 +24,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_RGNAME = "rgName";
     public static final String COLUMN_LICENSETYPE = "licenseType";
 
-    // 테이블 생성 SQL 구문 정의
-    private static final String TABLE_CREATE =
+    // 일정 테이블 및 칼럼 이름 정의
+    public static final String TABLE_SCHEDULE = "schedule";
+    public static final String COLUMN_DATE = "date";
+    public static final String COLUMN_EVENT = "event";
+
+    // 자격증 테이블 생성 SQL 구문 정의
+    private static final String TABLE_CREATE_LICENSES =
             "CREATE TABLE " + TABLE_LICENSES + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     COLUMN_LDID + " TEXT, " +
                     COLUMN_JMFLDNM + " TEXT, " +
                     COLUMN_RGNAME + " TEXT, " +
                     COLUMN_LICENSETYPE + " TEXT);";
+
+    // 일정 테이블 생성 SQL 구문 정의
+    private static final String TABLE_CREATE_SCHEDULE =
+            "CREATE TABLE " + TABLE_SCHEDULE + " (" +
+                    COLUMN_DATE + " TEXT PRIMARY KEY, " +
+                    COLUMN_EVENT + " TEXT);";
 
     // 생성자: 데이터베이스 초기화
     public DatabaseHelper(Context context) {
@@ -42,13 +52,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // 데이터베이스가 처음 생성될 때 호출되는 메서드
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(TABLE_CREATE);
+        db.execSQL(TABLE_CREATE_LICENSES);
+        db.execSQL(TABLE_CREATE_SCHEDULE);
     }
 
     // 데이터베이스가 업그레이드될 때 호출되는 메서드
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LICENSES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SCHEDULE);
         onCreate(db);
     }
 
@@ -60,19 +72,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{COLUMN_LDID, COLUMN_JMFLDNM, COLUMN_RGNAME, COLUMN_LICENSETYPE},
                 null, null, null, null, null);
 
-        // 커서가 null이 아닌 경우 데이터를 읽어옴
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 String ldId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LDID));
                 String jmfldnm = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_JMFLDNM));
                 String rgName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RGNAME));
                 String licenseType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LICENSETYPE));
-                // 자격증 아이템을 리스트에 추가
                 certificationItems.add(new CertificationItem(jmfldnm, rgName)); // 필요한 필드로 변경 가능
             }
             cursor.close();
         }
 
         return certificationItems;
+    }
+
+    // 자격증 데이터 삭제 메서드 추가
+    public void deleteAllLicenses() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_LICENSES, null, null);
+        db.close();
     }
 }

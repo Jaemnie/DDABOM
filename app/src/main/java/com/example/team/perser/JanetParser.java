@@ -98,7 +98,7 @@ public class JanetParser {
         requestSet.setScheduleStatus(Arrays.asList());
         Variables variables = new Variables();
         variables.setPage(1);
-        variables.setItemsPerPage(256);
+        variables.setItemsPerPage(250); // 가져올 자격증 수를 10개로 제한
         variables.setRequest(requestSet);
         LicenseSearchRequest request = new LicenseSearchRequest();
         // 요청 객체 설정
@@ -133,6 +133,7 @@ public class JanetParser {
             }
         });
     }
+
     // 자격증 데이터를 데이터베이스에 삽입하는 메서드
     private void insertLicenseData(License license) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -143,7 +144,8 @@ public class JanetParser {
         values.put(DatabaseHelper.COLUMN_LICENSETYPE, license.getLicenseType());
         db.insert(DatabaseHelper.TABLE_LICENSES, null, values);
     }
-    public void Janet_Magazine(String url,DataCallback callback){
+
+    public void Janet_Magazine(String url, DataCallback callback) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -160,10 +162,10 @@ public class JanetParser {
                         String description = listItem.select("p").text();
 
                         // 추출한 정보 출력
-                        M_Data.add(new Object[]{link,imgSrc,title,description});
+                        M_Data.add(new Object[]{link, imgSrc, title, description});
                     }
                     callback.onDataReceived(M_Data);
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                     callback.onFailure(e);
                 }

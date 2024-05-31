@@ -12,6 +12,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.team.perser.DataCallback;
+import com.example.team.perser.JanetParser;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +24,8 @@ public class HomeFragment extends Fragment {
     private NewsPagerAdapter pagerAdapter;
     private RecyclerView newsRecyclerView;
     private NewsFeedAdapter newsFeedAdapter;
+    private List<NewsFeedItem> newsFeedList;
+    private List<NewsItem> newsList;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -37,28 +42,51 @@ public class HomeFragment extends Fragment {
         setupViewPager();
         setupNewsFeed();
 
+        // JanetParser를 통해 매거진 데이터 가져오기
+        fetchMagazineData();
+
         return view;
     }
 
     private void setupViewPager() {
-        List<NewsItem> newsList = new ArrayList<>();
-        newsList.add(new NewsItem(R.drawable.ele));
-        newsList.add(new NewsItem(R.drawable.ja));
-        newsList.add(new NewsItem(R.drawable.ja2));
-
+        newsList = new ArrayList<>();
         pagerAdapter = new NewsPagerAdapter(newsList);
         viewPager.setAdapter(pagerAdapter);
     }
 
     private void setupNewsFeed() {
-        List<NewsFeedItem> newsFeedList = new ArrayList<>();
-        // Add news feed items
-        newsFeedList.add(new NewsFeedItem("News 1", "News Description 1"));
-        newsFeedList.add(new NewsFeedItem("News 2", "News Description 2"));
-        newsFeedList.add(new NewsFeedItem("News 3", "News Description 3"));
-
+        newsFeedList = new ArrayList<>();
         newsFeedAdapter = new NewsFeedAdapter(newsFeedList);
         newsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         newsRecyclerView.setAdapter(newsFeedAdapter);
+    }
+
+    private void fetchMagazineData() {
+        JanetParser parser = new JanetParser(getContext());
+        parser.Janet_Magazine("https://janet.co.kr/bbs/board.php?bo_table=bMagazine&wr_id=217&page=1", new DataCallback() {
+            @Override
+            public void onDataReceived(List<Object[]> data) {
+                for (Object[] item : data) {
+                    String link = (String) item[0];
+                    String imgSrc = (String) item[1];
+                    String title = (String) item[2];
+                    String description = (String) item[3];
+                    newsFeedList.add(new NewsFeedItem(title, description));
+                    newsList.add(new NewsItem(imgSrc));
+                }
+                // UI를 업데이트하기 위해 메인 스레드에서 어댑터에 데이터 변경 알림
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        newsFeedAdapter.notifyDataSetChanged();
+                        pagerAdapter.notifyDataSetChanged();
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                t.printStackTrace();
+            }
+        });
     }
 }
