@@ -1,13 +1,16 @@
 package com.example.team;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,6 +34,9 @@ public class CertificationFragment extends Fragment {
     // 데이터베이스 헬퍼 객체 선언
     private DatabaseHelper dbHelper;
     private EditText searchEditText; // 검색어 입력 창
+    // 상세정보 표시 다이얼로그
+    private Dialog showDetailCert;
+    private int selectItem;
 
     // 필수적으로 빈 생성자 선언
     public CertificationFragment() {
@@ -66,6 +72,20 @@ public class CertificationFragment extends Fragment {
         filteredCertificationList = new ArrayList<>(certificationList); // 초기 필터링된 리스트 설정
         adapter = new CertificationAdapter(getContext(), filteredCertificationList);
         listView.setAdapter(adapter);
+        //자격증 아이템 클릭시
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectItem=position;
+                /*
+                Toast.makeText(getContext(),certificationList.get(selectItem).getTitle() ,Toast.LENGTH_SHORT).show();
+                */
+                CertificationItem selectedItem = certificationList.get(selectItem);
+                String Host=selectedItem.getDescription(); // 주관기관 임시로
+                CertificationDialog dialog = new CertificationDialog(getContext(), selectedItem.getTitle(), "","",Host);
+                dialog.show();
+            }
+        });
     }
 
     // 검색 기능 설정 메서드
@@ -126,4 +146,5 @@ public class CertificationFragment extends Fragment {
             }
         });
     }
+
 }

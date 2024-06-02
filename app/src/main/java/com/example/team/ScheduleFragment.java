@@ -21,6 +21,7 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -78,6 +79,9 @@ public class ScheduleFragment extends Fragment {
         });
 
         calendarView.setSelectedDate(CalendarDay.today());  // 오늘 날짜를 기본 선택으로 설정
+        showScheduleDate.setText(String.format("%04d-%02d-%02d",
+                CalendarDay.today().getYear(),CalendarDay.today().getMonth()+1,CalendarDay.today().getDay())
+                +"\n시험일정");
 
         // 추가 버튼 클릭 리스너 설정
         addButton.setOnClickListener(new View.OnClickListener() {
