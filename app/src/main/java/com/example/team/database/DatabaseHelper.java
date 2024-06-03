@@ -74,11 +74,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                String ldId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LDID));
+                int ldId = Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LDID)));
                 String jmfldnm = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_JMFLDNM));
                 String rgName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RGNAME));
                 String licenseType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LICENSETYPE));
-                certificationItems.add(new CertificationItem(jmfldnm, rgName)); // 필요한 필드로 변경 가능
+                certificationItems.add(new CertificationItem(ldId,jmfldnm, rgName)); // 필요한 필드로 변경 가능
             }
             cursor.close();
         }

@@ -37,6 +37,7 @@ public class CertificationFragment extends Fragment {
     // 상세정보 표시 다이얼로그
     private Dialog showDetailCert;
     private int selectItem;
+    private int ldid;
 
     // 필수적으로 빈 생성자 선언
     public CertificationFragment() {
@@ -81,8 +82,9 @@ public class CertificationFragment extends Fragment {
                 Toast.makeText(getContext(),certificationList.get(selectItem).getTitle() ,Toast.LENGTH_SHORT).show();
                 */
                 CertificationItem selectedItem = certificationList.get(selectItem);
-                String Host=selectedItem.getDescription(); // 주관기관 임시로
-                CertificationDialog dialog = new CertificationDialog(getContext(), selectedItem.getTitle(), "","",Host);
+                String Host=selectedItem.getDescription();
+                int ldid=selectedItem.getIdid();
+                CertificationDialog dialog = new CertificationDialog(getContext(), selectedItem.getTitle(),Host,ldid);
                 dialog.show();
             }
         });
@@ -130,9 +132,10 @@ public class CertificationFragment extends Fragment {
             public void onDataReceived(List<Object[]> data) {
                 certificationList.clear(); // 기존 리스트 초기화
                 for (Object[] item : data) {
+                    ldid = (int) item[0];
                     String title = (String) item[1];
                     String description = (String) item[2];
-                    certificationList.add(new CertificationItem(title, description));
+                    certificationList.add(new CertificationItem(ldid,title, description));
                 }
                 // 필터링된 리스트 업데이트
                 filter(searchEditText.getText().toString());
