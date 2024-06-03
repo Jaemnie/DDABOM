@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.TextView;
@@ -37,6 +38,10 @@ public class CertificationDialog extends Dialog {
         setContentView(R.layout.dialog_show_detailcertification);
 
         TextView cert_title = findViewById(R.id.certification_title);
+
+        // 다이얼로그 크기를 화면에 맞추도록 설정
+        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
         /* 응시료, 자격요건 주석처리
         TextView cert_fee = findViewById(R.id.certification_fee);
         TextView cert_quali = findViewById(R.id.certification_qualifications);
